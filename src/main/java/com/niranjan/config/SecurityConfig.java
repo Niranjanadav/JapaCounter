@@ -44,7 +44,17 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.disable())
             .cors(Customizer.withDefaults())
-            .authorizeHttpRequests(auth->auth.requestMatchers("/api/auth/login").permitAll().requestMatchers("/api/user/register").permitAll().requestMatchers("/api/auth/refresh").permitAll().requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll().anyRequest().authenticated())
+            .authorizeHttpRequests(auth -> auth
+            	    .requestMatchers(
+            	        "/api/auth/login", 
+            	        "/api/user/register", 
+            	        "/api/auth/refresh",
+            	        "/swagger-ui/**", 
+            	        "/v3/api-docs/**",
+            	        "/swagger-ui.html" 
+            	    ).permitAll()
+            	    .anyRequest().authenticated()
+             )
             .exceptionHandling(ex->ex.authenticationEntryPoint(point))
             .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         

@@ -46,6 +46,51 @@ public class JapaService {
         return new JapaStatsResponse(save.getCurrentBeads(), save.getCurrentRounds(), save.getTotalBeadCounts(), save.getTotalBeadCounts()/108);
 	}
 	
+	public JapaStatsResponse decrementBeads(Long userId, int decrementBeads) {
+		User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+ 
+        LocalDate today = LocalDate.now();
+        
+        Japa japa = japaRepository.findByUserAndJapaDate(user, today)
+                                  .orElseThrow(()-> new JapaNotFoundException("Japa not found of user :" + user.getUsername()));
+        
+        if(japa.getCurrentBeads()!=0) {
+        
+			        japa.setTotalBeadCounts(japa.getTotalBeadCounts()-decrementBeads);
+			        int newCount = japa.getCurrentBeads() - decrementBeads;
+			        
+			        if(newCount>=0) {
+				        japa.setCurrentRounds(japa.getCurrentRounds()-(newCount/108));
+				        japa.setCurrentBeads(newCount%108);
+				        japa.setUpdatedAt(today);
+			        }
+			        else {
+			        	japa.setCurrentRounds(japa.getCurrentRounds());
+				        japa.setCurrentBeads(0);
+				        japa.setUpdatedAt(today);
+			        }
+        }      
+	    Japa save = japaRepository.save(japa);
+        
+        return new JapaStatsResponse(save.getCurrentBeads(), save.getCurrentRounds(), save.getTotalBeadCounts(), save.getTotalBeadCounts()/108);
+	}
+	
+	
+	public JapaStatsResponse resetCount(Long userId) {
+		User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+ 
+        LocalDate today = LocalDate.now();
+        
+        Japa japa = japaRepository.findByUserAndJapaDate(user, today)
+                                  .orElseThrow(()-> new JapaNotFoundException("Japa not found of user :" + user.getUsername()));
+        
+        japa.setCurrentBeads(0);
+        Japa save = japaRepository.save(japa);
+        
+        return new JapaStatsResponse(save.getCurrentBeads(), save.getCurrentRounds(), save.getTotalBeadCounts(), save.getTotalBeadCounts()/108);
+	}
 	
 	public JapaStatsResponse getTodayStats(Long id) {
 		User user = userRepository.findById(id)
