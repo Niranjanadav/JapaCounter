@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.niranjan.DTOs.JapaLifeTimeResponse;
 import com.niranjan.DTOs.JapaStatsResponse;
+import com.niranjan.customExceptions.JapaNotFoundException;
+import com.niranjan.customExceptions.UserNotFoundException;
 import com.niranjan.entities.Japa;
 import com.niranjan.entities.User;
 import com.niranjan.repository.JapaRepository;
@@ -24,7 +26,7 @@ public class JapaService {
 	
 	public JapaStatsResponse incrementBeads(Long userId, int incrementBeads) {
 		User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
  
         LocalDate today = LocalDate.now();
         
@@ -47,17 +49,17 @@ public class JapaService {
 	
 	public JapaStatsResponse getTodayStats(Long id) {
 		User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
  
         LocalDate today = LocalDate.now();
         
-        Japa japa = japaRepository.findByUserAndJapaDate(user, today).orElseThrow(()->new RuntimeException("Japa entry is not found"));
+        Japa japa = japaRepository.findByUserAndJapaDate(user, today).orElseThrow(()->new JapaNotFoundException("Japa entry is not found for id : " + id));
         
         return new JapaStatsResponse(japa.getCurrentBeads(), japa.getCurrentRounds(), japa.getTotalBeadCounts(), japa.getTotalBeadCounts()/108);
 	}
 	
 	public JapaLifeTimeResponse getLifeTimeStats(Long id) {
-		User user = userRepository.findById(id).orElseThrow(()-> new RuntimeException("User not found with id : " + id));
+		User user = userRepository.findById(id).orElseThrow(()-> new UserNotFoundException("User not found with id : " + id));
 		Long totalBeads = japaRepository.sumTotalBeadsByUser(user);
 		Long totalRounds = totalBeads / 108;
 		
@@ -65,7 +67,7 @@ public class JapaService {
 	}
 	
 	public List<Japa> getHistroy(Long id, LocalDate start, LocalDate end){
-		User user = userRepository.findById(id).orElseThrow(()-> new RuntimeException("User not found with id : " + id));
+		User user = userRepository.findById(id).orElseThrow(()-> new UserNotFoundException("User not found with id : " + id));
 		return japaRepository.findByUserAndJapaDateBetween(user, start, end);
 	}
 	
